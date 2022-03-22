@@ -34,6 +34,9 @@ pub struct InitArgs {
 
     /// Max number of checkpoint files kept
     pub max_checkpoint_files: u32,
+
+    /// Attestation provider
+    pub attestation_provider: String,
 }
 
 pub fn git_revision() -> String {
