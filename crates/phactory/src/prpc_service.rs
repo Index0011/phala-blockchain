@@ -257,6 +257,7 @@ impl<Platform: pal::Platform + Serialize + DeserializeOwned> Phactory<Platform> 
         genesis_state: blocks::StorageState,
         operator: Option<chain::AccountId>,
         debug_set_key: ::core::option::Option<Vec<u8>>,
+        attestation_provider: ::core::option::Option<String>,
     ) -> RpcResult<pb::InitRuntimeResponse> {
         if self.system.is_some() {
             return Err(from_display("Runtime already initialized"));
@@ -281,6 +282,7 @@ impl<Platform: pal::Platform + Serialize + DeserializeOwned> Phactory<Platform> 
         };
         self.dev_mode = rt_data.dev_mode;
         self.skip_ra = skip_ra;
+        self.attestation_provider = attestation_provider.unwrap_or("ias".to_owned());
 
         if !skip_ra && self.dev_mode {
             return Err(from_display(
@@ -736,6 +738,7 @@ impl<Platform: pal::Platform + Serialize + DeserializeOwned> PhactoryApi
             request.decode_genesis_state()?,
             request.decode_operator()?,
             request.debug_set_key,
+            request.attestation_provider,
         )
     }
 
