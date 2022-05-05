@@ -35,8 +35,6 @@ use clap::{AppSettings, Parser};
 use msg_sync::{Error as MsgSyncError, Receiver, Sender};
 use notify_client::NotifyClient;
 
-use phala_types::AttestationReport;
-
 #[derive(Parser, Debug)]
 #[clap(
     about = "Sync messages between pruntime and the blockchain.",
@@ -78,13 +76,6 @@ struct Args {
         help = "Inject key to pRuntime."
     )]
     inject_key: String,
-
-    #[clap(
-        short = 'r',
-        long = "remote-attestation",
-        help = "Should enable Remote Attestation"
-    )]
-    ra: bool,
 
     #[clap(
         default_value = "ws://localhost:9944",
@@ -169,6 +160,7 @@ struct Args {
         help = "The transaction longevity, should be a power of two between 4 and 65536. unit: block"
     )]
     longevity: u64,
+
     #[clap(
         default_value = "200",
         long,
@@ -696,7 +688,6 @@ async fn init_runtime(
     api: &RelaychainApi,
     para_api: &ParachainApi,
     pr: &PrClient,
-    skip_ra: bool,
     attestation_provider: String,
     use_dev_key: bool,
     inject_key: &str,
@@ -735,7 +726,7 @@ async fn init_runtime(
 
     let resp = pr
         .init_runtime(prpc::InitRuntimeRequest::new(
-            skip_ra,
+            false,
             genesis_info,
             debug_set_key,
             genesis_state,
@@ -756,7 +747,6 @@ async fn register_worker(
 ) -> Result<()> {
     let pruntime_info = Decode::decode(&mut &encoded_runtime_info[..])
         .map_err(|_| anyhow!("Decode pruntime info failed"))?;
-    // FIXME: incorrect type, require update metadata
     let attestation = Decode::decode(&mut &attestation.payload[..])
         .map_err(|_| anyhow!("Decode attestation payload failed"))?;
     chain_client::update_signer_nonce(para_api, signer).await?;
@@ -884,7 +874,6 @@ async fn bridge(
                 &api,
                 &para_api,
                 &pr,
-                !args.ra,
                 args.attestation_provider.clone(),
                 args.use_dev_key,
                 &args.inject_key,
@@ -1079,9 +1068,9 @@ async fn bridge(
 
 fn preprocess_args(args: &mut Args) {
     if args.dev {
-        args.ra = false;
         args.use_dev_key = true;
         args.mnemonic = String::from("//Alice");
+        args.attestation_provider = String::from("opt-out");
     }
     if args.longevity > 0 {
         assert!(args.longevity >= 4, "Option --longevity must be 0 or >= 4.");

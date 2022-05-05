@@ -68,10 +68,6 @@ struct Args {
     /// Measuring the time it takes to process each RPC call.
     #[clap(long)]
     measure_rpc_time: bool,
-
-    /// Attestation provider, currently support "ias" and "opt_out"
-    #[structopt(long, default_value = "ias")]
-    attestation_provider: String,
 }
 
 #[rocket::main]
@@ -119,8 +115,7 @@ async fn main() {
             enable_checkpoint: !args.disable_checkpoint,
             checkpoint_interval: args.checkpoint_interval,
             remove_corrupted_checkpoint: args.remove_corrupted_checkpoint,
-            max_checkpoint_files: args.max_checkpoint_files,
-            attestation_provider: args.attestation_provider,
+            max_checkpoint_files: args.max_checkpoint_files
         }
     };
     info!("init_args: {:#?}", init_args);

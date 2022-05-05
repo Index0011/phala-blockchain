@@ -65,7 +65,6 @@ mod contracts;
 mod cryptography;
 mod light_validation;
 mod prpc_service;
-mod rpc_types;
 mod secret_channel;
 mod side_task;
 mod storage;
@@ -216,7 +215,6 @@ enum RuntimeDataSeal {
 pub struct Phactory<Platform> {
     platform: Platform,
     pub args: InitArgs,
-    skip_ra: bool,
     dev_mode: bool,
     attestation_provider: String,
     machine_id: Vec<u8>,
@@ -238,7 +236,6 @@ impl<Platform: pal::Platform> Phactory<Platform> {
         Phactory {
             platform,
             args: Default::default(),
-            skip_ra: false,
             dev_mode: false,
             attestation_provider: String::default(),
             machine_id,
