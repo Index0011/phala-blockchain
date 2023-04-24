@@ -223,13 +223,15 @@ pub mod pallet {
 				KeepAlive,
 			)?;
 			Self::mint_into(&user, amount)?;
-			StakerAccounts::<T>::insert(
-				&user,
-				FinanceAccount::<BalanceOf<T>> {
-					invest_pools: vec![],
-					locked: Zero::zero(),
-				},
-			);
+			if !StakerAccounts::<T>::contains_key(&user) {
+				StakerAccounts::<T>::insert(
+					&user,
+					FinanceAccount::<BalanceOf<T>> {
+						invest_pools: vec![],
+						locked: Zero::zero(),
+					},
+				);
+			}
 			Self::deposit_event(Event::<T>::Wrapped { user, amount });
 			Ok(())
 		}
@@ -366,7 +368,6 @@ pub mod pallet {
 			Ok(())
 		}
 	}
-
 	impl<T: Config> Pallet<T>
 	where
 		BalanceOf<T>: sp_runtime::traits::AtLeast32BitUnsigned + Copy + FixedPointConvert + Display,
